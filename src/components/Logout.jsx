@@ -9,9 +9,10 @@ const LogoutButton = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    router?.push("/login");
     await signOut();
+    onLogout();
   };
+
   return (
     <>
       {session.status === "authenticated" && (

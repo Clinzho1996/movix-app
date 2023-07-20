@@ -15,7 +15,10 @@ export default function Login() {
   useEffect(() => {
     setError(params.get("error"));
     setSuccess(params.get("success"));
-  }, [params]);
+    if (session.status === "authenticated") {
+      router?.push("/");
+    }
+  }, [params, session.status, router]);
 
   if (session.status === "loading") {
     return (
@@ -23,10 +26,6 @@ export default function Login() {
         <p className="text-white animate-bounce">Loading...</p>
       </div>
     );
-  }
-
-  if (session.status === "authenticated") {
-    router?.push("/");
   }
 
   const handleSubmit = (e) => {

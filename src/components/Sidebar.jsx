@@ -9,21 +9,26 @@ import {
   MdOutlineCancel,
   MdTrendingUp,
 } from "react-icons/md";
-import LogoutButton from "../Logout";
+import LogoutButton from "./Logout";
+import { AiFillHeart } from "react-icons/ai";
+import { GoHomeFill } from "react-icons/go";
 
 const Sidebar = () => {
+  const handleLogout = () => {
+    router.replace("/login");
+  };
   const menu = [
     {
       id: 1,
       title: "Home",
       path: "/",
-      icon: <MdHome />,
+      icon: <GoHomeFill />,
     },
     {
       id: 2,
       title: "Favorites",
       path: "/favorites",
-      icon: <MdHeartBroken />,
+      icon: <AiFillHeart />,
     },
     {
       id: 3,
@@ -40,7 +45,7 @@ const Sidebar = () => {
     // Add more genre links here
   ];
   return (
-    <div className="h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10 pl-5 bg-black">
+    <div className="h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10 pl-5 bg-[#21201E] shadow-lg shadow-purple-500">
       <>
         <div className="flex justify-between items-center">
           <Link
@@ -76,7 +81,7 @@ const Sidebar = () => {
           </div>
         </div>
         <div className="absolute bottom-5">
-          <LogoutButton />
+          <LogoutButton onLogout={handleLogout} />
         </div>
       </>
     </div>
