@@ -49,7 +49,7 @@ const Home = () => {
             <h2 className="text-white text-4xl font-bold">Insider</h2>
             <div className="flex flex-col justify-start align-middle">
               <p className="text-white text-sm mt-3">
-                2021 | Comdey, Horror | 1 Season
+                2021 | Comedy, Horror | 1 Season
               </p>
             </div>
             <div className="flex flex-row gap-3 justify-start mt-8 mb-3 align-middle items-center">

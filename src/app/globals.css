@@ -2,10 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* styles/global.css */
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("https://fonts.googleapis.com/css2?family=Satoshi&display=swap");
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  font-family: "Satoshi";
 }
 
 html,

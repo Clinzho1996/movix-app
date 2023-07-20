@@ -45,7 +45,7 @@ const Navbar = () => {
           onClick={toggleSearchField}
         />
         <MdNotifications className="text-xl" />
-        <div className="flex flex-row justify-between gap-3 align-middle">
+        <div className="flex flex-row justify-between gap-2 align-middle">
           {session?.user?.image ? (
             <Image
               src={session.user.image}
@@ -56,7 +56,9 @@ const Navbar = () => {
             />
           ) : (
             <div className="rounded-full mt-[-8px] h-8 w-8 flex items-center justify-center text-sm bg-purple-800 text-white">
-              {getNameInitials(session?.user?.name)}
+              <h2 className="text-2xl">
+                {getNameInitials(session?.user?.name)}
+              </h2>
             </div>
           )}
           <h3 className="text-sm">{session?.user?.name}</h3>
