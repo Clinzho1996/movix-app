@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,7 +34,7 @@ const Navbar = () => {
   }
 
   return (
-    <div className="flex flex-row justify-between mt-3 text-white">
+    <div className="flex flex-row justify-between mt-3 text-white z-50">
       <div className="flex flex-row gap-5">
         <Link href="/movies">Movies</Link>
         <Link href="/series">Series</Link>
@@ -45,27 +46,32 @@ const Navbar = () => {
           onClick={toggleSearchField}
         />
         <MdNotifications className="text-xl" />
-        <div className="flex flex-row justify-between gap-2 align-middle">
-          {session?.user?.image ? (
-            <Image
-              src={session.user.image}
-              alt="profile"
-              width={30}
-              height={30}
-              className="rounded-full mt-[-8px]"
-            />
-          ) : (
-            <div className="rounded-full mt-[-8px] h-8 w-8 flex items-center justify-center text-sm bg-purple-800 text-white">
-              <h2 className="text-2xl">
-                {getNameInitials(session?.user?.name)}
-              </h2>
-            </div>
-          )}
-          <h3 className="text-sm">{session?.user?.name}</h3>
-        </div>
+        {session?.user ? ( // Check if user is available in session
+          <div className="flex flex-row justify-between gap-2 align-middle">
+            {session.user.image ? (
+              <Image
+                src={session.user.image}
+                alt="profile"
+                width={30}
+                height={30}
+                className="rounded-full mt-[-8px]"
+              />
+            ) : (
+              <div className="rounded-full mt-[-8px] h-8 w-8 flex items-center justify-center text-sm bg-purple-800 text-white">
+                <h2 className="text-2xl">
+                  {getNameInitials(session.user.name)}
+                </h2>
+              </div>
+            )}
+            <h3 className="text-sm">{session.user.name}</h3>
+          </div>
+        ) : (
+          // Render a placeholder if user is not available in session
+          <div className="h-8 w-8 mt-[-8px] flex items-center justify-center bg-purple-800 text-white rounded-full" />
+        )}
       </div>
       {showSearchField && (
-        <div className="absolute align-middle items-center right-20 top-14 bg-[#21201E] p-2 rounded-md w-[60%] border-2">
+        <div className="absolute align-middle items-center right-[18%] top-14 bg-[#21201E] p-2 rounded-md w-[50%] border-2">
           {/* Your search field content here */}
           <input
             type="text"

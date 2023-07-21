@@ -1,10 +1,8 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useState } from "react";
 import {
   MdCalendarMonth,
-  MdHeartBroken,
-  MdHome,
   MdNotStarted,
   MdOutlineCancel,
   MdTrendingUp,
@@ -14,9 +12,15 @@ import { AiFillHeart } from "react-icons/ai";
 import { GoHomeFill } from "react-icons/go";
 
 const Sidebar = () => {
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
   const handleLogout = () => {
     router.replace("/login");
   };
+
+  const handleToggleSidebar = () => {
+    setIsSidebarVisible((prevState) => !prevState);
+  };
+
   const menu = [
     {
       id: 1,
@@ -45,7 +49,11 @@ const Sidebar = () => {
     // Add more genre links here
   ];
   return (
-    <div className="h-screen md:overflow-hidden overflow-auto md:hover:overflow-auto pb-10 pl-5 bg-[#21201E] shadow-lg shadow-purple-500">
+    <div
+      className={`h-screen md:overflow-hidden overflow-auto ${
+        isSidebarVisible ? "md:hover:overflow-auto" : ""
+      } pb-10 pl-5 bg-[#21201E] shadow-lg shadow-purple-500`}
+    >
       <>
         <div className="flex justify-between items-center">
           <Link
@@ -58,6 +66,7 @@ const Sidebar = () => {
           <button
             type="button"
             className="text-xl rounded-full p-3 hover:bg-light-gray mt-4 block md:hidden"
+            onClick={handleToggleSidebar}
           >
             <MdOutlineCancel />
           </button>

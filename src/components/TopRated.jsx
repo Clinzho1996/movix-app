@@ -8,7 +8,7 @@ import MovieDetailsPopup from "./MovieDetailsPopup";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-const TrendingCategory = () => {
+const TopRated = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState({}); // Track favorites using movie IDs
@@ -17,7 +17,7 @@ const TrendingCategory = () => {
   const [genres, setGenres] = useState({}); // State to store the genres data
 
   const API_KEY = process.env.MOVIE_DB_API_KEY;
-  const BASE_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+  const BASE_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`;
 
   const fetchMovie = async () => {
     try {
@@ -153,4 +153,4 @@ const TrendingCategory = () => {
   );
 };
 
-export default TrendingCategory;
+export default TopRated;

@@ -4,7 +4,7 @@ const nextConfig = {
     serverComponentsExternalPackages: ["mongoose"],
   },
   images: {
-    domains: ["lh3.googleusercontent.com"],
+    domains: ["lh3.googleusercontent.com", "image.tmdb.org"],
   },
   webpack(config) {
     config.experiments = {
@@ -12,6 +12,9 @@ const nextConfig = {
       topLevelAwait: true,
     };
     return config;
+  },
+  publicRuntimeConfig: {
+    API_KEY: process.env.MONGO_DB_API_KEY,
   },
 };
 

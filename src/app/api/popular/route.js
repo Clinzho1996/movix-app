@@ -1,17 +1,19 @@
+// pages/api/popular.js
 import axios from "axios";
 import { NextResponse } from "next/server";
 
 const handler = async (req, res) => {
   try {
-    const url = `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.MOVIE_DB_API_KEY}`;
+    const response = await axios.get(
+      `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.MOVIE_DB_API_KEY}`
+    );
 
-    const response = await axios.get(url);
-    return new NextResponse(response.data, { status: 200 });
+    // console.log("TMDb API response:", response.data.results); // Log the response data
+
+    return new NextResponse(response.data.results, { status: 200 });
   } catch (error) {
-    console.error("Error fetching top-rated movies:", error.message);
-    return new NextResponse("Error fetching top-rated movies.", {
-      status: 500,
-    });
+    console.error("Error fetching popular movies:", error.message);
+    return new NextResponse("Error fetching data", { status: 500 });
   }
 };
 
