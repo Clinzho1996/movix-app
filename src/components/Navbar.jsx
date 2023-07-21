@@ -34,7 +34,10 @@ const Navbar = () => {
   }
 
   return (
-    <div className="flex flex-row justify-between mt-3 text-white z-50">
+    <div
+      className="flex flex-row justify-between mt-3 text-white"
+      style={{ zIndex: 20 }}
+    >
       <div className="flex flex-row gap-5">
         <Link href="/movies">Movies</Link>
         <Link href="/series">Series</Link>

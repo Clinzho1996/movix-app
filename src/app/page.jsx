@@ -120,13 +120,11 @@ const Home = () => {
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
               minHeight: "20vh",
-              backgroundColor: "#000",
-              opacity: 0.8,
             }}
             key={randomMovie.id}
           >
             <Navbar />
-            <div className="mt-[15%]" style={{ zIndex: 2 }}>
+            <div className="mt-[15%]">
               <h2 className="text-white text-4xl font-bold z-10">
                 {randomMovie.title}
               </h2>
@@ -183,12 +181,6 @@ const Home = () => {
         <div className="p-5">
           <h2 className="text-white text-2xl font-bold">Upcoming Movies</h2>
           <UpcomingMovies />
-        </div>
-
-        {/* Upcoming Movies */}
-        <div className="p-5">
-          <h2 className="text-white text-2xl font-bold">Upcoming Movies</h2>
-          <TrendingCategory />
         </div>
       </div>
     </div>
