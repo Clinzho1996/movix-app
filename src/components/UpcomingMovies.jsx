@@ -16,7 +16,7 @@ const UpcomingMovies = () => {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
   const [genres, setGenres] = useState({}); // State to store the genres data
 
-  const API_KEY = process.env.MOVIE_DB_API_KEY;
+  const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
   const BASE_URL = `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=en-US&page=1`;
 
   const fetchMovie = async () => {

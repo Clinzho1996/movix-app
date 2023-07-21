@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 const handler = async (req, res) => {
   try {
     const response = await axios.get(
-      `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.MOVIE_DB_API_KEY}`
+      `https://api.themoviedb.org/3/movie/popular?api_key=${process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY}`
     );
 
     // console.log("TMDb API response:", response.data.results); // Log the response data

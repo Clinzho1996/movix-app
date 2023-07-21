@@ -3,7 +3,8 @@
 import "./globals.css"; // Import your global CSS file
 import { Inter } from "next/font/google";
 import AuthProvider from "@/components/AuthProvider/AuthProvider";
-import Head from "next/head";
+import dotenv from "dotenv";
+dotenv.config();
 
 const inter = Inter({ subsets: ["latin"] });
 

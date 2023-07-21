@@ -6,7 +6,7 @@ import { MdClose } from "react-icons/md";
 const MovieDetailsPopup = ({ movieId, onClose }) => {
   const [movieDetails, setMovieDetails] = useState(null);
 
-  const API_KEY = process.env.MOVIE_DB_API_KEY;
+  const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
   const MOVIE_DETAILS_URL = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&language=en-US`;
   const MOVIE_CREDITS_URL = `https://api.themoviedb.org/3/movie/${movieId}/credits?api_key=${API_KEY}`;
 

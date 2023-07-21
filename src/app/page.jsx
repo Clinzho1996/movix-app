@@ -60,7 +60,7 @@ const Home = () => {
     }
   }, [session.status, router]);
 
-  const API_KEY = process.env.MOVIE_DB_API_KEY;
+  const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
   const BASE_URL = `https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`;
 
   const fetchMovie = async () => {

@@ -13,9 +13,6 @@ const nextConfig = {
     };
     return config;
   },
-  publicRuntimeConfig: {
-    API_KEY: process.env.MONGO_DB_API_KEY,
-  },
 };
 
 module.exports = nextConfig;
