@@ -7,14 +7,16 @@ import MovieDetailsPopup from "./MovieDetailsPopup";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useSession } from "next-auth/react";
 
 const TrendingCategory = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isFavorite, setIsFavorite] = useState({}); // Track favorites using movie IDs
-  const [showPopup, setShowPopup] = useState(false); // State to show/hide the movie details popup
+  const session = useSession();
+  const [isFavorite, setIsFavorite] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
-  const [genres, setGenres] = useState({}); // State to store the genres data
+  const [genres, setGenres] = useState({});
 
   const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
   const BASE_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
@@ -23,7 +25,7 @@ const TrendingCategory = () => {
     try {
       const response = await axios.get(BASE_URL);
       const movieData = response.data.results;
-      setMovies(movieData.slice(0, 10)); // Set the first 10 fetched movie data to the state
+      setMovies(movieData.slice(0, 30)); // Set the first 10 fetched movie data to the state
       setLoading(false); // Mark loading as complete
     } catch (error) {
       console.error("Error fetching movie:", error);
@@ -57,11 +59,61 @@ const TrendingCategory = () => {
     return genreIds.map((genreId) => genres[genreId]).join(", ");
   };
 
-  const handleAddToFavorites = (movie) => {
-    setIsFavorite((prevFavorites) => ({
-      ...prevFavorites,
-      [movie.id]: !prevFavorites[movie.id],
-    }));
+  const [favoriteMovies, setFavoriteMovies] = useState([]);
+
+  useEffect(() => {
+    const favoriteMap = favoriteMovies.reduce((acc, movie) => {
+      acc[movie.id] = true;
+      return acc;
+    }, {});
+    setIsFavorite(favoriteMap);
+  }, [favoriteMovies]);
+
+  const handleFavoriteClick = async (movieId) => {
+    if (!session.data) {
+      // If the user is not authenticated, redirect to the login page
+      router.push("/login");
+      return;
+    }
+
+    const movieIndex = favoriteMovies.findIndex(
+      (movie) => movie.id === movieId
+    );
+    const isAlreadyFavorite = movieIndex !== -1;
+
+    const requestBody = {
+      media_type: "movie",
+      media_id: movieId,
+      favorite: !isAlreadyFavorite,
+    };
+
+    try {
+      await axios.post(
+        `https://api.themoviedb.org/3/account/18247746/favorite?api_key=${API_KEY}&session_id=${session.id}`,
+        requestBody
+      );
+
+      if (isAlreadyFavorite) {
+        const updatedFavoriteMovies = [...favoriteMovies];
+        updatedFavoriteMovies.splice(movieIndex, 1);
+        setFavoriteMovies(updatedFavoriteMovies);
+      } else {
+        const movieToAdd = movies.find((movie) => movie.id === movieId);
+        if (movieToAdd) {
+          setFavoriteMovies((prevFavoriteMovies) => [
+            ...prevFavoriteMovies,
+            movieToAdd,
+          ]);
+        }
+      }
+
+      setIsFavorite((prevIsFavorite) => ({
+        ...prevIsFavorite,
+        [movieId]: !isAlreadyFavorite,
+      }));
+    } catch (error) {
+      console.error("Error updating favorite movies:", error);
+    }
   };
 
   // Function to handle opening the popup and setting the selected movie ID
@@ -110,12 +162,12 @@ const TrendingCategory = () => {
                 {isFavorite[movie.id] ? (
                   <AiFillHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleAddToFavorites(movie)}
+                    onClick={() => handleFavoriteClick(movie.id)}
                   />
                 ) : (
                   <FiHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleAddToFavorites(movie)}
+                    onClick={() => handleFavoriteClick(movie.id)}
                   />
                 )}
               </div>

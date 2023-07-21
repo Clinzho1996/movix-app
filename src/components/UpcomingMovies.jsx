@@ -1,20 +1,25 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { AiFillHeart } from "react-icons/ai";
 import { FiHeart } from "react-icons/fi";
 import Slider from "react-slick";
-import axios from "axios"; // Import axios to make API requests
+import axios from "axios";
 import MovieDetailsPopup from "./MovieDetailsPopup";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation"; // Import the router from next
 
 const UpcomingMovies = () => {
+  const router = useRouter(); // Get the router instance
+  const session = useSession();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isFavorite, setIsFavorite] = useState({}); // Track favorites using movie IDs
-  const [showPopup, setShowPopup] = useState(false); // State to show/hide the movie details popup
+  const [isFavorite, setIsFavorite] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
-  const [genres, setGenres] = useState({}); // State to store the genres data
+  const [genres, setGenres] = useState({});
 
   const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
   const BASE_URL = `https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=en-US&page=1`;
@@ -23,8 +28,8 @@ const UpcomingMovies = () => {
     try {
       const response = await axios.get(BASE_URL);
       const movieData = response.data.results;
-      setMovies(movieData.slice(0, 10)); // Set the first 10 fetched movie data to the state
-      setLoading(false); // Mark loading as complete
+      setMovies(movieData.slice(0, 30));
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching movie:", error);
     }
@@ -36,7 +41,6 @@ const UpcomingMovies = () => {
         `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`
       );
       const genresData = response.data.genres;
-      // Convert genre IDs to their corresponding names and store in the state
       const genresMap = {};
       genresData.forEach((genre) => {
         genresMap[genre.id] = genre.name;
@@ -52,31 +56,77 @@ const UpcomingMovies = () => {
     fetchGenres();
   }, []);
 
-  // Function to get genre names from genre IDs
   const getGenreNames = (genreIds) => {
     return genreIds.map((genreId) => genres[genreId]).join(", ");
   };
 
-  const handleAddToFavorites = (movie) => {
-    setIsFavorite((prevFavorites) => ({
-      ...prevFavorites,
-      [movie.id]: !prevFavorites[movie.id],
-    }));
+  const [favoriteMovies, setFavoriteMovies] = useState([]);
+
+  useEffect(() => {
+    const favoriteMap = favoriteMovies.reduce((acc, movie) => {
+      acc[movie.id] = true;
+      return acc;
+    }, {});
+    setIsFavorite(favoriteMap);
+  }, [favoriteMovies]);
+
+  const handleFavoriteClick = async (movieId) => {
+    if (!session.data) {
+      // If the user is not authenticated, redirect to the login page
+      router.push("/login");
+      return;
+    }
+
+    const movieIndex = favoriteMovies.findIndex(
+      (movie) => movie.id === movieId
+    );
+    const isAlreadyFavorite = movieIndex !== -1;
+
+    const requestBody = {
+      media_type: "movie",
+      media_id: movieId,
+      favorite: !isAlreadyFavorite,
+    };
+
+    try {
+      await axios.post(
+        `https://api.themoviedb.org/3/account/18247746/favorite?api_key=${API_KEY}&session_id=${session.id}`,
+        requestBody
+      );
+
+      if (isAlreadyFavorite) {
+        const updatedFavoriteMovies = [...favoriteMovies];
+        updatedFavoriteMovies.splice(movieIndex, 1);
+        setFavoriteMovies(updatedFavoriteMovies);
+      } else {
+        const movieToAdd = movies.find((movie) => movie.id === movieId);
+        if (movieToAdd) {
+          setFavoriteMovies((prevFavoriteMovies) => [
+            ...prevFavoriteMovies,
+            movieToAdd,
+          ]);
+        }
+      }
+
+      setIsFavorite((prevIsFavorite) => ({
+        ...prevIsFavorite,
+        [movieId]: !isAlreadyFavorite,
+      }));
+    } catch (error) {
+      console.error("Error updating favorite movies:", error);
+    }
   };
 
-  // Function to handle opening the popup and setting the selected movie ID
   const handleMovieClick = (movieId) => {
     setSelectedMovieId(movieId);
     setShowPopup(true);
   };
 
-  // Function to handle closing the popup
   const handleClosePopup = () => {
     setShowPopup(false);
   };
 
   if (loading) {
-    // Add a loading state if necessary
     return <div>Loading...</div>;
   }
 
@@ -84,10 +134,10 @@ const UpcomingMovies = () => {
     dots: false,
     infinite: true,
     speed: 500,
-    slidesToShow: 5, // Number of movies to show in the slider at once
+    slidesToShow: 5,
     slidesToScroll: 1,
-    autoplay: true, // Enable autoplay for automatic scrolling
-    autoplaySpeed: 3000, //  // Custom right arrow component
+    autoplay: true,
+    autoplaySpeed: 3000,
   };
 
   return (
@@ -107,15 +157,22 @@ const UpcomingMovies = () => {
               onClick={() => handleMovieClick(movie.id)}
             >
               <div className="bg-gray-300 p-2 rounded-md w-[38px] flex flex-row justify-end mt-2 absolute top-2 right-2">
+                {/* Use the onClick event directly on the icon components */}
                 {isFavorite[movie.id] ? (
                   <AiFillHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleAddToFavorites(movie)}
+                    onClick={(event) => {
+                      event.stopPropagation(); // Prevent click event from bubbling up
+                      handleFavoriteClick(movie.id);
+                    }}
                   />
                 ) : (
                   <FiHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleAddToFavorites(movie)}
+                    onClick={(event) => {
+                      event.stopPropagation(); // Prevent click event from bubbling up
+                      handleFavoriteClick(movie.id);
+                    }}
                   />
                 )}
               </div>
@@ -142,7 +199,6 @@ const UpcomingMovies = () => {
           </div>
         ))}
       </Slider>
-      {/* Render the MovieDetailsPopup when showPopup is true */}
       {showPopup && (
         <MovieDetailsPopup
           movieId={selectedMovieId}

@@ -50,7 +50,7 @@ const Sidebar = () => {
   ];
   return (
     <div
-      className={`h-screen md:overflow-hidden overflow-auto ${
+      className={`sidebar h-screen md:overflow-hidden overflow-auto ${
         isSidebarVisible ? "md:hover:overflow-auto" : ""
       } pb-10 pl-5 bg-[#21201E] shadow-lg shadow-purple-500`}
     >

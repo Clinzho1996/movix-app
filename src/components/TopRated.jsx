@@ -23,7 +23,7 @@ const TopRated = () => {
     try {
       const response = await axios.get(BASE_URL);
       const movieData = response.data.results;
-      setMovies(movieData.slice(0, 10)); // Set the first 10 fetched movie data to the state
+      setMovies(movieData.slice(0, 30)); // Set the first 10 fetched movie data to the state
       setLoading(false); // Mark loading as complete
     } catch (error) {
       console.error("Error fetching movie:", error);

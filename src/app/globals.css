@@ -6,14 +6,14 @@
 
 @font-face {
   font-family: "Satoshi";
-  src: url("https://fonts.googleapis.com/css2?family=Satoshi&display=swap");
+  src: url("https://fonts.googleapis.com/css2?family=Montserrat&display=swap");
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: "Satoshi";
+  font-family: "Montserrat";
 }
 
 html,
@@ -70,4 +70,10 @@ a:active {
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+}
+
+@media screen and (max-width: 968px) {
+  .sidebar {
+    display: none;
+  }
 }

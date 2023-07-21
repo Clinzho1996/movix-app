@@ -34,16 +34,13 @@ const Navbar = () => {
   }
 
   return (
-    <div
-      className="flex flex-row justify-between mt-3 text-white"
-      style={{ zIndex: 20 }}
-    >
+    <div className="relative flex flex-row justify-between mt-3 text-white">
       <div className="flex flex-row gap-5">
         <Link href="/movies">Movies</Link>
         <Link href="/series">Series</Link>
         <Link href="/documentaries">Documentaries</Link>
       </div>
-      <div className="flex flex-row gap-5 align-middle">
+      <div className="flex flex-row gap-5 align-middle absolute right-[20%]">
         <FiSearch
           className="text-xl cursor-pointer"
           onClick={toggleSearchField}
@@ -61,7 +58,7 @@ const Navbar = () => {
               />
             ) : (
               <div className="rounded-full mt-[-8px] h-8 w-8 flex items-center justify-center text-sm bg-purple-800 text-white">
-                <h2 className="text-2xl">
+                <h2 className="text-xl">
                   {getNameInitials(session.user.name)}
                 </h2>
               </div>

@@ -2,7 +2,7 @@
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation"; // Corrected import statement
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { FiHeart, FiHeartFill } from "react-icons/fi";
 import { AiFillHeart } from "react-icons/ai";
@@ -13,72 +13,36 @@ import TopRated from "@/components/TopRated";
 import UpcomingMovies from "@/components/UpcomingMovies";
 import format from "date-fns/format";
 
-const Home = () => {
+const Documentaries = () => {
   const session = useSession();
-  const router = useRouter(); // Corrected import statement
+  const router = useRouter();
   const [movies, setMovies] = useState([]);
-  const [isFavorite, setIsFavorite] = useState({}); // Track favorites using movie IDs
-  const [genres, setGenres] = useState({}); // State to store the genres data
-  const [favoriteMovies, setFavoriteMovies] = useState([]); // Initialize favoriteMovies state
-  const [loading, setLoading] = useState(true); // Initialize loading state
+  const [loading, setLoading] = useState(true);
+  const [genres, setGenres] = useState({}); // Store genre names using their IDs
 
-  // Initialize isFavorite state based on favoriteMovies
-  useEffect(() => {
-    const favoriteMap = favoriteMovies.reduce((acc, movie) => {
-      acc[movie.id] = true;
-      return acc;
-    }, {});
-    setIsFavorite(favoriteMap);
-  }, [favoriteMovies]);
+  // Use an array of objects to track favorite status for each movie
+  const [favoriteMovies, setFavoriteMovies] = useState([]);
 
-  const handleFavoriteClick = async (movieId) => {
-    if (!session.data) {
-      // If the user is not authenticated, redirect to the login page
-      router.push("/login");
-      return;
-    }
-    // Check if the movie is already in favorites
+  const handleFavoriteClick = (movieId) => {
+    // Find the movie in the favoriteMovies state by its ID
     const movieIndex = favoriteMovies.findIndex(
       (movie) => movie.id === movieId
     );
-    const isAlreadyFavorite = movieIndex !== -1;
 
-    // Prepare the request body
-    const requestBody = {
-      media_type: "movie",
-      media_id: movieId,
-      favorite: !isAlreadyFavorite,
-    };
-
-    // Make the POST request to add/remove from favorites
-    try {
-      await axios.post(
-        `https://api.themoviedb.org/3/account/18247746/favorite?api_key=${API_KEY}&session_id=${session.id}`,
-        requestBody
-      );
-
-      // Update the favoriteMovies state accordingly
-      if (isAlreadyFavorite) {
-        const updatedFavoriteMovies = [...favoriteMovies];
-        updatedFavoriteMovies.splice(movieIndex, 1);
-        setFavoriteMovies(updatedFavoriteMovies);
-      } else {
-        const movieToAdd = movies.find((movie) => movie.id === movieId);
-        if (movieToAdd) {
-          setFavoriteMovies((prevFavoriteMovies) => [
-            ...prevFavoriteMovies,
-            movieToAdd,
-          ]);
-        }
+    if (movieIndex !== -1) {
+      // Movie is already in favorites, remove it
+      const updatedFavoriteMovies = [...favoriteMovies];
+      updatedFavoriteMovies.splice(movieIndex, 1);
+      setFavoriteMovies(updatedFavoriteMovies);
+    } else {
+      // Movie is not in favorites, add it
+      const movieToAdd = movies.find((movie) => movie.id === movieId);
+      if (movieToAdd) {
+        setFavoriteMovies((prevFavoriteMovies) => [
+          ...prevFavoriteMovies,
+          movieToAdd,
+        ]);
       }
-
-      // Update the isFavorite state
-      setIsFavorite((prevIsFavorite) => ({
-        ...prevIsFavorite,
-        [movieId]: !isAlreadyFavorite,
-      }));
-    } catch (error) {
-      console.error("Error updating favorite movies:", error);
     }
   };
 
@@ -176,22 +140,19 @@ const Home = () => {
                 <button className="text-white bg-purple-800 p-3 w-[150px] rounded-md cursor-pointer h-13">
                   Watch Now
                 </button>
-                <div className="bg-gray-300 p-3 rounded-md flex flex-row">
-                  {isFavorite[randomMovie.id] ? (
+                <div className="bg-gray-300 p-3 rounded-md">
+                  {/* Display different heart icons based on favorite status */}
+                  {favoriteMovies.some(
+                    (movie) => movie.id === randomMovie.id
+                  ) ? (
                     <AiFillHeart
-                      className="text-purple-800 text-2xl rounded-md cursor-pointer"
-                      onClick={(event) => {
-                        event.stopPropagation(); // Prevent click event from bubbling up
-                        handleFavoriteClick(randomMovie.id);
-                      }}
+                      className="text-purple-800 text-2xl h-13 w-13 rounded-md cursor-pointer"
+                      onClick={() => handleFavoriteClick(randomMovie.id)}
                     />
                   ) : (
                     <FiHeart
-                      className="text-purple-800 text-xl rounded-md cursor-pointer"
-                      onClick={(event) => {
-                        event.stopPropagation(); // Prevent click event from bubbling up
-                        handleFavoriteClick(randomMovie.id);
-                      }}
+                      className="text-purple-800 text-2xl h-13 w-13 rounded-md cursor-pointer"
+                      onClick={() => handleFavoriteClick(randomMovie.id)}
                     />
                   )}
                 </div>
@@ -202,28 +163,34 @@ const Home = () => {
 
         {/* Top Rated */}
         <div className="p-5">
-          <h2 className="text-white text-2xl font-bold">Top Rated Movies</h2>
-          <TopRated className="w-full" />
+          <h2 className="text-white text-2xl font-bold">
+            Top Rated Documentaries
+          </h2>
+          <TopRated />
         </div>
         {/* Now Playing */}
         <div className="p-5">
           <h2 className="text-white text-2xl font-bold"> Now Playing</h2>
-          <PopularMovies className="w-full" />
+          <PopularMovies />
         </div>
 
         {/* Popular Movies */}
         <div className="p-5">
-          <h2 className="text-white text-2xl font-bold">Popular Movies</h2>
-          <TrendingCategory className="w-full" />
+          <h2 className="text-white text-2xl font-bold">
+            Popular Documentaries
+          </h2>
+          <TrendingCategory />
         </div>
         {/* Upcoming Movies */}
         <div className="p-5">
-          <h2 className="text-white text-2xl font-bold">Upcoming Movies</h2>
-          <UpcomingMovies className="w-full" />
+          <h2 className="text-white text-2xl font-bold">
+            Upcoming Documentaries
+          </h2>
+          <UpcomingMovies />
         </div>
       </div>
     </div>
   );
 };
 
-export default Home;
+export default Documentaries;
