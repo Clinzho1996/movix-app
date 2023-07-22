@@ -110,12 +110,18 @@ const TopRated = () => {
                 {isFavorite[movie.id] ? (
                   <AiFillHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleAddToFavorites(movie)}
+                    onClick={(event) => {
+                      event.stopPropagation(); // Prevent click event from bubbling up
+                      handleAddToFavorites(movie);
+                    }}
                   />
                 ) : (
                   <FiHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleAddToFavorites(movie)}
+                    onClick={(event) => {
+                      event.stopPropagation(); // Prevent click event from bubbling up
+                      handleAddToFavorites(movie);
+                    }}
                   />
                 )}
               </div>

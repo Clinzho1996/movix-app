@@ -1,9 +1,10 @@
 // pages/_app.js
-
+"use client";
 import "./globals.css"; // Import your global CSS file
 import { Inter } from "next/font/google";
-import AuthProvider from "@/components/AuthProvider/AuthProvider";
 import dotenv from "dotenv";
+import { SessionProvider } from "next-auth/react";
+import Provider from "@/components/Provider";
 dotenv.config();
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,7 +19,7 @@ export default function RootLayout({ children }) {
     <>
       <html lang="en">
         <body className={inter.className}>
-          <AuthProvider>{children}</AuthProvider>
+          <Provider>{children}</Provider>
         </body>
       </html>
     </>

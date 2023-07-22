@@ -7,12 +7,10 @@ import MovieDetailsPopup from "./MovieDetailsPopup";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useSession } from "next-auth/react";
 
 const TrendingCategory = () => {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
-  const session = useSession();
   const [isFavorite, setIsFavorite] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const [selectedMovieId, setSelectedMovieId] = useState(null);
@@ -59,61 +57,11 @@ const TrendingCategory = () => {
     return genreIds.map((genreId) => genres[genreId]).join(", ");
   };
 
-  const [favoriteMovies, setFavoriteMovies] = useState([]);
-
-  useEffect(() => {
-    const favoriteMap = favoriteMovies.reduce((acc, movie) => {
-      acc[movie.id] = true;
-      return acc;
-    }, {});
-    setIsFavorite(favoriteMap);
-  }, [favoriteMovies]);
-
-  const handleFavoriteClick = async (movieId) => {
-    if (!session.data) {
-      // If the user is not authenticated, redirect to the login page
-      router.push("/login");
-      return;
-    }
-
-    const movieIndex = favoriteMovies.findIndex(
-      (movie) => movie.id === movieId
-    );
-    const isAlreadyFavorite = movieIndex !== -1;
-
-    const requestBody = {
-      media_type: "movie",
-      media_id: movieId,
-      favorite: !isAlreadyFavorite,
-    };
-
-    try {
-      await axios.post(
-        `https://api.themoviedb.org/3/account/18247746/favorite?api_key=${API_KEY}&session_id=${session.id}`,
-        requestBody
-      );
-
-      if (isAlreadyFavorite) {
-        const updatedFavoriteMovies = [...favoriteMovies];
-        updatedFavoriteMovies.splice(movieIndex, 1);
-        setFavoriteMovies(updatedFavoriteMovies);
-      } else {
-        const movieToAdd = movies.find((movie) => movie.id === movieId);
-        if (movieToAdd) {
-          setFavoriteMovies((prevFavoriteMovies) => [
-            ...prevFavoriteMovies,
-            movieToAdd,
-          ]);
-        }
-      }
-
-      setIsFavorite((prevIsFavorite) => ({
-        ...prevIsFavorite,
-        [movieId]: !isAlreadyFavorite,
-      }));
-    } catch (error) {
-      console.error("Error updating favorite movies:", error);
-    }
+  const handleAddToFavorites = (movie) => {
+    setIsFavorite((prevFavorites) => ({
+      ...prevFavorites,
+      [movie.id]: !prevFavorites[movie.id],
+    }));
   };
 
   // Function to handle opening the popup and setting the selected movie ID
@@ -162,12 +110,12 @@ const TrendingCategory = () => {
                 {isFavorite[movie.id] ? (
                   <AiFillHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleFavoriteClick(movie.id)}
+                    onClick={() => handleAddToFavorites(movie)}
                   />
                 ) : (
                   <FiHeart
                     className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
-                    onClick={() => handleFavoriteClick(movie.id)}
+                    onClick={() => handleAddToFavorites(movie)}
                   />
                 )}
               </div>

@@ -58,7 +58,7 @@ const MovieDetailsPopup = ({ movieId, onClose }) => {
             alt="movie image"
             width={250}
             height={300}
-            className="rounded-md"
+            className="rounded-md w-auto h-auto"
           />
         </div>
         <div className="mt-5 pr-20">

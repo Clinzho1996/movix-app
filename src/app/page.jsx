@@ -14,87 +14,20 @@ import UpcomingMovies from "@/components/UpcomingMovies";
 import format from "date-fns/format";
 
 const Home = () => {
-  const session = useSession();
+  const { data: session } = useSession();
+  console.log("Session data:", session);
   const router = useRouter(); // Corrected import statement
   const [movies, setMovies] = useState([]);
   const [isFavorite, setIsFavorite] = useState({}); // Track favorites using movie IDs
   const [genres, setGenres] = useState({}); // State to store the genres data
-  const [favoriteMovies, setFavoriteMovies] = useState([]); // Initialize favoriteMovies state
   const [loading, setLoading] = useState(true); // Initialize loading state
-
-  // Initialize isFavorite state based on favoriteMovies
-  useEffect(() => {
-    const favoriteMap = favoriteMovies.reduce((acc, movie) => {
-      acc[movie.id] = true;
-      return acc;
-    }, {});
-    setIsFavorite(favoriteMap);
-  }, [favoriteMovies]);
-
-  const handleFavoriteClick = async (movieId) => {
-    if (!session.data) {
-      // If the user is not authenticated, redirect to the login page
-      router.push("/login");
-      return;
-    }
-    // Check if the movie is already in favorites
-    const movieIndex = favoriteMovies.findIndex(
-      (movie) => movie.id === movieId
-    );
-    const isAlreadyFavorite = movieIndex !== -1;
-
-    // Prepare the request body
-    const requestBody = {
-      media_type: "movie",
-      media_id: movieId,
-      favorite: !isAlreadyFavorite,
-    };
-
-    // Make the POST request to add/remove from favorites
-    try {
-      await axios.post(
-        `https://api.themoviedb.org/3/account/18247746/favorite?api_key=${API_KEY}&session_id=${session.id}`,
-        requestBody
-      );
-
-      // Update the favoriteMovies state accordingly
-      if (isAlreadyFavorite) {
-        const updatedFavoriteMovies = [...favoriteMovies];
-        updatedFavoriteMovies.splice(movieIndex, 1);
-        setFavoriteMovies(updatedFavoriteMovies);
-      } else {
-        const movieToAdd = movies.find((movie) => movie.id === movieId);
-        if (movieToAdd) {
-          setFavoriteMovies((prevFavoriteMovies) => [
-            ...prevFavoriteMovies,
-            movieToAdd,
-          ]);
-        }
-      }
-
-      // Update the isFavorite state
-      setIsFavorite((prevIsFavorite) => ({
-        ...prevIsFavorite,
-        [movieId]: !isAlreadyFavorite,
-      }));
-    } catch (error) {
-      console.error("Error updating favorite movies:", error);
-    }
-  };
+  const [submitting, setIsSubmitting] = useState(false);
 
   // Function to format the release date in "28th June, 2023" format
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return format(date, "do MMMM, yyyy");
   };
-
-  useEffect(() => {
-    // This code will run after the component has mounted (client-side)
-    // Check session status and redirect to login if not authenticated
-    if (session.status !== "authenticated") {
-      router.replace("/login");
-    }
-  }, [session.status, router]);
 
   const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
   const BASE_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
@@ -109,6 +42,14 @@ const Home = () => {
       console.error("Error fetching movie:", error);
     }
   };
+
+  // useEffect(() => {
+  //   // This code will run after the component has mounted (client-side)
+  //   // Check session status and redirect to login if not authenticated
+  //   if (session !== "authenticated") {
+  //     router.replace("/login");
+  //   }
+  // }, [router]);
 
   const fetchGenres = async () => {
     try {
@@ -138,6 +79,42 @@ const Home = () => {
   // Function to get genre names from genre IDs
   const getGenreNames = (genreIds) => {
     return genreIds.map((genreId) => genres[genreId]).join(", ");
+  };
+
+  const addToFavorite = async (e, randomMovie) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      if (!session?.user?.id) {
+        // If the userId is not available in the session, handle the error or return
+        console.log("User ID not found in the session.");
+        return;
+      }
+      console.log("Payload sent to server:", {
+        name: randomMovie.title,
+        userId: session.user.id,
+        image: randomMovie.backdrop_path,
+        genre: randomMovie.genre_ids,
+      });
+
+      const response = await fetch("/api/favorite/new", {
+        method: "POST",
+        body: JSON.stringify({
+          name: randomMovie.title,
+          userId: session.user.id,
+          image: randomMovie.backdrop_path,
+          genre: randomMovie.genre_ids,
+        }),
+      });
+      if (response.ok) {
+        router.push("/favorites");
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -172,7 +149,10 @@ const Home = () => {
                   </span>
                 </p>
               </div>
-              <div className="flex flex-row gap-3 justify-start mt-8 mb-3 align-middle items-center">
+              <div
+                className="flex flex-row gap-3 justify-start mt-8 mb-3 align-middle items-center z-20"
+                style={{ zIndex: 20 }}
+              >
                 <button className="text-white bg-purple-800 p-3 w-[150px] rounded-md cursor-pointer h-13">
                   Watch Now
                 </button>
@@ -180,18 +160,12 @@ const Home = () => {
                   {isFavorite[randomMovie.id] ? (
                     <AiFillHeart
                       className="text-purple-800 text-2xl rounded-md cursor-pointer"
-                      onClick={(event) => {
-                        event.stopPropagation(); // Prevent click event from bubbling up
-                        handleFavoriteClick(randomMovie.id);
-                      }}
+                      onClick={(e) => addToFavorite(e, randomMovie)}
                     />
                   ) : (
                     <FiHeart
                       className="text-purple-800 text-xl rounded-md cursor-pointer"
-                      onClick={(event) => {
-                        event.stopPropagation(); // Prevent click event from bubbling up
-                        handleFavoriteClick(randomMovie.id);
-                      }}
+                      onClick={(e) => addToFavorite(e, randomMovie)}
                     />
                   )}
                 </div>
