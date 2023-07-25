@@ -60,8 +60,8 @@ const Series = () => {
     }
   }, [session.status, router]);
 
-  const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
-  const BASE_URL = `https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+  const API_KEY = process.env.NEXT_PUBLIC_FAVORITE_API_KEY;
+  const BASE_URL = `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&language=en-US&page=1`;
 
   const fetchMovie = async () => {
     try {
@@ -77,7 +77,7 @@ const Series = () => {
   const fetchGenres = async () => {
     try {
       const response = await axios.get(
-        `https://api.themoviedb.org/3/genre/movie/list?api_key=${API_KEY}&language=en-US`
+        `https://api.themoviedb.org/3/genre/tv/list?api_key=${API_KEY}&language=en-US`
       );
       const genresData = response.data.genres;
       // Convert genre IDs to their corresponding names and store in the state

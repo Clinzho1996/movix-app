@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation"; // Fixed import typo
 import MovieDetailsPopup from "@/components/MovieDetailsPopup";
+import useSWR from "swr";
 
 const Favorites = () => {
   const router = useRouter();
@@ -19,7 +20,14 @@ const Favorites = () => {
   const [selectedMovieId, setSelectedMovieId] = useState(null);
 
   const API_KEY = process.env.NEXT_PUBLIC_MOVIE_DB_API_KEY;
-  const API_FAVORITE = process.env.NEXT_PUBLIC_FAVORITE_API_KEY;
+
+  //NEW WAY TO FETCH DATA
+  const fetcher = (...args) => fetch(...args).then((res) => res.json());
+
+  const { data, mutate, error, isLoading } = useSWR(
+    `/api/favorite?username=${session?.data?.user.name}`,
+    fetcher
+  );
 
   useEffect(() => {
     async function fetchFavoriteMovies() {
@@ -43,6 +51,8 @@ const Favorites = () => {
         setFavoriteMovies(data);
         setIsFavorite(favoritesMap);
         setLoading(false);
+
+        setGenres(data.genre);
       } catch (error) {
         console.error(error);
         setFavoriteMovies([]);
@@ -77,23 +87,6 @@ const Favorites = () => {
     fetchGenres();
   }, []);
 
-  const getGenreNames = (genreIds) => {
-    // Check if genreIds is an array
-    if (!Array.isArray(genreIds) || genreIds.length === 0) {
-      return "Unknown Genre";
-    }
-
-    // Check if genres data is available
-    if (!genres || Object.keys(genres).length === 0) {
-      return "Genre data not available";
-    }
-
-    // Map genreIds to genre names and join them with a comma
-    return genreIds
-      .map((genreId) => genres[genreId] || "Unknown Genre")
-      .join(", ");
-  };
-
   // Function to handle opening the popup and setting the selected movie ID
   const handleMovieClick = (movieId) => {
     setSelectedMovieId(movieId);
@@ -105,6 +98,17 @@ const Favorites = () => {
     setShowPopup(false);
   };
 
+  const handleDelete = async (movieid) => {
+    console.log("Deleting movie with ID:", movieid);
+    try {
+      await fetch(`/api/favorite/${movieid}`, {
+        method: "DELETE",
+      });
+      mutate();
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <>
       <div className="flex relative">
@@ -133,10 +137,13 @@ const Favorites = () => {
                   >
                     <div className="bg-gray-300 p-2 rounded-md w-[38px] flex flex-row justify-end mt-2 absolute top-2 right-2">
                       {/* Add/Remove from Favorites */}
-                      {isFavorite[movie.id] ? (
-                        <AiFillHeart className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer" />
+                      {isFavorite[movie.movieid] ? (
+                        <AiFillHeart
+                          className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer"
+                          onClick={() => handleDelete(movie.movieid)}
+                        />
                       ) : (
-                        <FiHeart className="text-purple-800 text-xl h-13 w-13 rounded-md cursor-pointer" />
+                        <AiFillHeart />
                       )}
                     </div>
                     <div
@@ -152,11 +159,6 @@ const Favorites = () => {
                       <h2 className="text-black text-[16px] font-bold">
                         {movie?.name}
                       </h2>
-                      <div className="flex flex-col justify-start align-middle">
-                        <p className="text-black text-sm mt-1">
-                          {getGenreNames(movie?.genre)}
-                        </p>
-                      </div>
                     </div>
                   </div>
 

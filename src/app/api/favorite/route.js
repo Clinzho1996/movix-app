@@ -10,3 +10,4 @@ export const GET = async (request) => {
     return new Response("Failed to fetch favorite movies", { status: 500 });
   }
 };
+

@@ -8,6 +8,10 @@ const favoriteMovieSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    movieid: {
+      type: String,
+      require: false,
+    },
     name: {
       type: String,
       required: false,
@@ -25,5 +29,14 @@ const favoriteMovieSchema = new Schema(
 );
 
 // If the FavoriteMovie collection does not exist, create a new one.
-export default mongoose.models.FavoriteMovie ||
-  mongoose.model("FavoriteMovie", favoriteMovieSchema);
+let FavoriteMovieModel;
+try {
+  FavoriteMovieModel =
+    mongoose.models.FavoriteMovie ||
+    mongoose.model("FavoriteMovie", favoriteMovieSchema);
+} catch (error) {
+  // Handle any errors that occurred during model creation
+  console.error("Error creating FavoriteMovie model:", error.message);
+}
+
+export default FavoriteMovieModel;

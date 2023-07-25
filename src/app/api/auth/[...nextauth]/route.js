@@ -1,5 +1,4 @@
 import NextAuth from "next-auth";
-import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import User from "@/models/User";
@@ -39,10 +38,6 @@ const handler = NextAuth({
         }
       },
     }),
-    GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
-    }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -50,31 +45,49 @@ const handler = NextAuth({
   ],
   callbacks: {
     async session({ session }) {
-      // store the user id from MongoDB to session
-      const sessionUser = await User.findOne({ email: session.user.email });
-      session.user.id = sessionUser._id.toString();
+      try {
+        // store the user id from MongoDB to session
+        const sessionUser = await User.findOne({ email: session.user.email });
 
-      return session;
+        if (sessionUser && sessionUser._id) {
+          // If the user is found and has a valid _id property, assign it to the session user
+          session.user.id = sessionUser._id.toString();
+        }
+
+        return session;
+      } catch (error) {
+        // Handle any errors that might occur during the process
+        console.error("Error fetching user data for session:", error);
+        throw new Error("Internal Server Error");
+      }
     },
-    async signIn({ account, profile, user, credentials }) {
+    async signIn({ profile }) {
       try {
         await connect();
 
-        // check if user already exists
-        const userExists = await User.findOne({ email: profile.email });
+        // Check if user already exists by email
+        const existingUser = await User.findOne({ email: profile.email });
 
-        // if not, create a new document and save user in MongoDB
-        if (!userExists) {
+        if (!existingUser) {
+          // If not, create a new document and save the user in MongoDB
           await User.create({
             email: profile.email,
             username: profile.name.replace(" ", "").toLowerCase(),
             image: profile.picture,
           });
+        } else if (existingUser.name === null) {
+          // If a user with the same email exists but has a null name, update the name
+          existingUser.username = profile.name.replace(" ", "").toLowerCase();
+          existingUser.image = profile.picture;
+          await existingUser.save();
         }
+
+        // Remove users with null names (if any)
+        await User.deleteMany({ name: null });
 
         return true;
       } catch (error) {
-        console.log("Error checking if user exists: ", error.message);
+        console.error("Error checking if user exists: ", error.message);
         return false;
       }
     },

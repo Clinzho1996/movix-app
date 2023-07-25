@@ -52,11 +52,11 @@ const MovieDetailsPopup = ({ movieId, onClose }) => {
         <MdClose className="text-2xl text-white " />
       </button>
       <div className="flex flex-row gap-5">
-        <div className="flex-2">
+        <div>
           <Image
             src={`https://image.tmdb.org/t/p/w500/${movieDetails?.poster_path}`}
             alt="movie image"
-            width={250}
+            width={300}
             height={300}
             className="rounded-md w-auto h-auto"
           />
